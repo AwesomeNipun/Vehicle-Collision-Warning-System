@@ -11,7 +11,7 @@ nmsThreshold= 0.2
 classesFile = "coco.names"
 classNames = []
 with open(classesFile, 'rt') as f:
-    classNames = f.read().rstrip('n').split('n')
+    classNames = f.read().split('\n')
 print(classNames)
 ## Model Files
 modelConfiguration = "yolov3.cfg.txt"
@@ -20,7 +20,9 @@ net = cv.dnn.readNetFromDarknet(modelConfiguration, modelWeights)
 net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
 net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
-def findObjects(outputs,img):
+j=0
+def findObjects(outputs,img, video):
+    global j
     hT, wT, cT = img.shape
     bbox = []
     classIds = []
@@ -40,24 +42,30 @@ def findObjects(outputs,img):
     indices = cv.dnn.NMSBoxes(bbox, confs, confThreshold, nmsThreshold)
 
     for i in indices:
-        i = i[0]
         box = bbox[i]
+        # print(box)
         x, y, w, h = box[0], box[1], box[2], box[3]
         # print(x,y,w,h)
         cv.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
-        cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
+        out = cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
                   (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
+                
+    video.write(out)
 
+frame_width = int(cap.get(3))
+frame_height = int(cap.get(4))
+frame_size = (frame_width,frame_height)
+fps = int(cap.get(cv.CAP_PROP_FPS))
+vid_out = cv.VideoWriter("output.avi", cv.VideoWriter_fourcc('M','J','P','G'), fps, frame_size )
 while True:
     success, img = cap.read()
-    blob = cv.dnn.blobFromImage(img, 1 / 255, (whT, whT), [0, 0, 0], 1, crop=False)
-    net.setInput(blob)
-    layersNames = net.getLayerNames()
-    for i in net.getUnconnectedOutLayers():
-        print(i[0] - 1)
-    outputNames = [(layersNames[i[0] - 1]) for i in net.getUnconnectedOutLayers()]
-    outputs = net.forward(outputNames)
-    findObjects(outputs,img)
-
-    cv.imshow('Image', img)
-    cv.waitKey(1)
+    try:
+        blob = cv.dnn.blobFromImage(img, 1 / 255, (whT, whT), [0, 0, 0], 1, crop=False)
+        net.setInput(blob)
+        layersNames = net.getLayerNames()
+        outputNames = [(layersNames[i - 1]) for i in net.getUnconnectedOutLayers()]
+        outputs = net.forward(outputNames)
+        findObjects(outputs,img, vid_out)
+        cv.waitKey(0)
+    except:
+        break
