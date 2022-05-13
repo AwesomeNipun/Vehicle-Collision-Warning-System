@@ -8,6 +8,7 @@ def click_event(event, x, y, flags, pts):
     # checking for left mouse clicks
     if event == cv2.EVENT_LBUTTONDOWN:
         pts.append([x,y])
+        cv2.putText(img, '.', (x,y), cv2.FONT_HERSHEY_SIMPLEX,1, (0, 0, 255), 5)
         cv2.imshow('image', img)
     return pts
  
@@ -28,14 +29,13 @@ if __name__=="__main__":
     # list to get the coordinates of danger zone
     pts = []
 
-    # setting mouse handler for the image
+    # setting mouse handler for the image 
     # and calling the click_event() function
     cv2.setMouseCallback('image', click_event,pts)
     
     # wait for a key to be pressed to exit
     cv2.waitKey(0)
 
-    print(pts)
     # close the window
     cv2.destroyAllWindows()
 
@@ -47,7 +47,6 @@ if __name__=="__main__":
     
     # Polygon corner points coordinates
     pts = np.array(pts, np.int32)
-    print(pts)
     
     # Using cv2.polylines() method
     image = cv2.polylines(image, [pts], True, (0, 0, 255), 2)
