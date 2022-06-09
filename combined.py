@@ -38,9 +38,9 @@ def findObjects(outputs,img, video, pts):
         cv.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
         out = cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
                   (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
-        cv.circle(img, (c_x, c_y), 10, (255,0, 255), 4)
-        x = 2*p_x - w
-        y = 2*p_y - h
+        # cv.circle(img, (c_x, c_y), 10, (255,0, 255), 4)
+        x = int(p_x - w/2)
+        y = int(p_y - h/2)
         cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
                   (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
         cv.circle(img, (p_x, p_y), 10, (255,255, 0), 4)
@@ -58,7 +58,7 @@ def findObjects(outputs,img, video, pts):
         # using intersection()
         isIntersection = poly1.intersection(poly2)
         if not(isIntersection==[]):
-            cv.putText(img, "WARNING!", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2 )
+            cv.putText(img, "WARNING!", (250, 50), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2 )
             
 
     #----------------------------------------------
@@ -166,7 +166,8 @@ if __name__=="__main__":
             outputs = net.forward(outputNames)
             # print(outputs)
             findObjects(outputs,img, vid_out, pts)
-            cv.waitKey(0)
+            cv.imshow("Image", img) 
+            cv.waitKeyEx(1)
         except:
             break
     #---------------------------------------------------------
