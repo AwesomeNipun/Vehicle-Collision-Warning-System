@@ -22,7 +22,7 @@ def findObjects(outputs,img, video, pts):
 
     indices = cv.dnn.NMSBoxes(bbox, confs, confThreshold, nmsThreshold)
     pts = np.array(pts, np.int32)
-    print(pts)
+    # print(pts)
 
     for i in indices:
         box = bbox[i]
@@ -45,10 +45,9 @@ def findObjects(outputs,img, video, pts):
         
         # using intersection()
         isIntersection = poly1.intersection(poly2)
-        if isIntersection==[]:
-            print("No intersection Detected")
-        else:
-            print("Intersected ",isIntersection)
+        if not(isIntersection==[]):
+            cv.putText(img, "WARNING!", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2 )
+            
 
     #----------------------------------------------
 
