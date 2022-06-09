@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from sympy import Point, Polygon
 
 def findObjects(outputs,img, video, pts):
     global j
@@ -20,17 +21,37 @@ def findObjects(outputs,img, video, pts):
                 confs.append(float(confidence))
 
     indices = cv.dnn.NMSBoxes(bbox, confs, confThreshold, nmsThreshold)
+    pts = np.array(pts, np.int32)
+    print(pts)
 
     for i in indices:
         box = bbox[i]
         # print(box)
         x, y, w, h = box[0], box[1], box[2], box[3]
-        # print(x,y,w,h)
+        # print(x,y,x+w,y+h)
+        arr = [[x,y], [x+w, y], [x+w, y+h], [x, y+h]]
         cv.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
         out = cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
                   (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
+        #-------------------------------------------------------------------
+        
+        # creating points using Point()
+        p1, p2, p3, p4 = map(Point, pts)
+        p5, p6, p7,p8 = map(Point, arr)
+        
+        # creating polygons using Polygon()
+        poly1 = Polygon(p1, p2, p3, p4)
+        poly2 = Polygon(p5, p6, p7,p8)
+        
+        # using intersection()
+        isIntersection = poly1.intersection(poly2)
+        if isIntersection==[]:
+            print("No intersection Detected")
+        else:
+            print("Intersected ",isIntersection)
+
     #----------------------------------------------
-    pts = np.array(pts, np.int32)
+
     
     # Using cv2.polylines() method
     image = cv.polylines(out, [pts], True, (0, 0, 255), 2)
