@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from sympy import Point, Polygon
+from kalmanfilter import KalmanFilter
 
 def findObjects(outputs,img, video, pts):
     global j
@@ -24,15 +25,26 @@ def findObjects(outputs,img, video, pts):
     pts = np.array(pts, np.int32)
     # print(pts)
 
+    kf = KalmanFilter()     # kalman filter
     for i in indices:
         box = bbox[i]
         # print(box)
         x, y, w, h = box[0], box[1], box[2], box[3]
         # print(x,y,x+w,y+h)
-        arr = [[x,y], [x+w, y], [x+w, y+h], [x, y+h]]
+        c_x = int(x+w/2)
+        c_y = int(y+h/2)
+        # print(c_x, c_y)
+        p_x, p_y = kf.predict(c_x, c_y)
         cv.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
         out = cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
                   (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
+        cv.circle(img, (c_x, c_y), 10, (255,0, 255), 4)
+        x = 2*p_x - w
+        y = 2*p_y - h
+        cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
+                  (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+        cv.circle(img, (p_x, p_y), 10, (255,255, 0), 4)
+        arr = [[x,y], [x+w, y], [x+w, y+h], [x, y+h]]
         #-------------------------------------------------------------------
         
         # creating points using Point()
