@@ -35,15 +35,11 @@ def findObjects(outputs,img, video, pts):
         c_y = int(y+h/2)
         # print(c_x, c_y)
         p_x, p_y = kf.predict(c_x, c_y)
-        cv.rectangle(img, (x, y), (x+w,y+h), (255, 0 , 255), 2)
+        cv.rectangle(img, (x, y), (x+w,y+h), (204, 0, 0), 2)
         out = cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
-                  (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
-        # cv.circle(img, (c_x, c_y), 10, (255,0, 255), 4)
+                  (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (204, 0, 0), 2)
         x = int(p_x - w/2)
         y = int(p_y - h/2)
-        cv.putText(img,f'{classNames[classIds[i]].upper()} {int(confs[i]*100)}%',
-                  (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
-        cv.circle(img, (p_x, p_y), 10, (255,255, 0), 4)
         arr = [[x,y], [x+w, y], [x+w, y+h], [x, y+h]]
         #-------------------------------------------------------------------
         
@@ -58,14 +54,14 @@ def findObjects(outputs,img, video, pts):
         # using intersection()
         isIntersection = poly1.intersection(poly2)
         if not(isIntersection==[]):
-            cv.putText(img, "WARNING!", (250, 50), cv.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2 )
+            cv.putText(img, "WARNING!", (int(frame_width/2)-100, 100), cv.FONT_HERSHEY_DUPLEX, 2, (0, 0, 255), 2 )
             
 
     #----------------------------------------------
 
     
     # Using cv2.polylines() method
-    image = cv.polylines(out, [pts], True, (0, 0, 255), 2)
+    image = cv.polylines(out, [pts], True, (0, 255, 255), 2)
 
     #--------------------------------------------------            
     video.write(image)
@@ -78,7 +74,7 @@ def click_event(event, x, y, flags, pts):
     # checking for left mouse clicks
     if event == cv.EVENT_LBUTTONDOWN:
         pts.append([x,y])
-        cv.putText(img_, '.', (x,y), cv.FONT_HERSHEY_SIMPLEX,1, (0, 0, 255), 5)
+        cv.putText(img_, '.', (x,y), cv.FONT_HERSHEY_SIMPLEX,1, (0, 255, 255), 5)
         cv.imshow('image', img_)
     return pts
 
@@ -87,7 +83,7 @@ def click_event(event, x, y, flags, pts):
 if __name__=="__main__":
 
     # code to get the first frame of the input video
-    vidcap = cv.VideoCapture('solidWhiteRight.mp4')
+    vidcap = cv.VideoCapture('sample_1.mp4')
     #--------------------------------------------------
     whT = 320
     confThreshold =0.5
@@ -114,7 +110,8 @@ if __name__=="__main__":
 
     # reading the image
     img_ = cv.imread('frame1.jpg', 1)
- 
+    cv.putText(img_, 'Select 4 points to mark danger zone',(20,50), cv.FONT_HERSHEY_DUPLEX, 1, (153, 51, 255), 2)
+    cv.putText(img_, 'Press any key to continue',(20,110), cv.FONT_HERSHEY_DUPLEX, 1, (153, 51, 255), 2)
     # displaying the image
     cv.imshow('image', img_)
 
@@ -141,9 +138,9 @@ if __name__=="__main__":
     pts = np.array(pts, np.int32)
     
     # Using cv2.polylines() method
-    image_ = cv.polylines(image_, [pts], True, (0, 0, 255), 2)
+    # image_ = cv.polylines(image_, [pts], True, (0, 0, 255), 2)
 
-    cv.imshow('image', image_)
+    # cv.imshow('image', image_)
     
     cv.waitKey(0)
     cv.destroyAllWindows()
@@ -157,17 +154,21 @@ if __name__=="__main__":
     vid_out = cv.VideoWriter("output.avi", cv.VideoWriter_fourcc('M','J','P','G'), fps, frame_size )
     while True:
         success, img = vidcap.read()
-        print("detecting...")
+        # print("detecting...")
         try:
             blob = cv.dnn.blobFromImage(img, 1 / 255, (whT, whT), [0, 0, 0], 1, crop=False)
             net.setInput(blob)
             layersNames = net.getLayerNames()
             outputNames = [(layersNames[i - 1]) for i in net.getUnconnectedOutLayers()]
             outputs = net.forward(outputNames)
-            # print(outputs)
             findObjects(outputs,img, vid_out, pts)
+            cv.putText(img, "Press Esc to exit", (20, 50), cv.FONT_HERSHEY_DUPLEX, 1, (102, 255, 102), 2)
             cv.imshow("Image", img) 
-            cv.waitKeyEx(1)
+            val = cv.waitKeyEx(1)
+            if val == 27:
+                cv.destroyAllWindows()
+                break
+            
         except:
             break
     #---------------------------------------------------------
