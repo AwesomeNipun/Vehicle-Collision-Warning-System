@@ -68,7 +68,7 @@ def click_event(event, x, y, flags, pts):
 
 if __name__=="__main__":
 
-    vidcap = cv.VideoCapture('sample_1.mp4')
+    vidcap = cv.VideoCapture('sample_2.mp4')
     #--------------------------------------------------
     whT = 320
     confThreshold =0.5
