@@ -1,4 +1,4 @@
-# Vehicle-Collision-Warning-System
+# Vehicle Collision Warning System
 
 ##Vehicle Collision Warning System is a python based project. The following is the procedure of the system.
 ###
